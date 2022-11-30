@@ -1,6 +1,12 @@
-namespace Domain
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Application.Profiles;
+
+namespace Application.Events
 {
-    public class Event
+    public class EventDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
@@ -11,7 +17,8 @@ namespace Domain
         public string Country { get; set; }
         public string City { get; set; }
         public string Venue { get; set; }
+        public string HostUsername { get; set; }
         public bool IsCancelled { get; set; }
-        public ICollection<EventAttendee> Attendees { get; set; } = new List<EventAttendee>();
+        public ICollection<Profile> Attendees { get; set; }
     }
 }

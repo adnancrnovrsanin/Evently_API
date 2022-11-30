@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Core;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,22 +14,28 @@ namespace Application.Events
 {
     public class List
     {
-        public class Query : IRequest<Result<List<Event>>> {
+        public class Query : IRequest<Result<List<EventDto>>> {
             
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<Event>>>
+        public class Handler : IRequestHandler<Query, Result<List<EventDto>>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
+                _mapper = mapper;
                 _context = context;
             }
 
-            public async Task<Result<List<Event>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<EventDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return Result<List<Event>>.Success(await _context.Events.ToListAsync());
+                var events = await _context.Events
+                    .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync(cancellationToken);
+
+                return Result<List<EventDto>>.Success(events);
             }
         }
     }
