@@ -1,3 +1,4 @@
+using Application.Core;
 using Application.Events;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -8,8 +9,8 @@ namespace API.Controllers
     public class EventsController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetEvents() {
-            return HandleResult(await Mediator.Send(new List.Query()));
+        public async Task<IActionResult> GetEvents([FromQuery]EventParams param) {
+            return HandlePagedResult(await Mediator.Send(new List.Query{ Params = param }));
         }
 
         [HttpGet("{id}")] // single Event
