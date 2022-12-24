@@ -34,6 +34,17 @@ namespace Application.Events
                     .OrderBy(d => d.Date)
                     .ProjectTo<EventDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
                     .AsQueryable();
+                
+                if (request.Params.SearchQuery != null) {
+                    query = query.Where(x => 
+                        x.Title.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
+                        x.Description.ToLower().Contains(request.Params.SearchQuery.ToLower()) || 
+                        x.Category.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
+                        x.City.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
+                        x.Venue.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
+                        x.HostUsername.ToLower().Contains(request.Params.SearchQuery.ToLower())
+                    );
+                }
 
                 if (request.Params.IsGoing && !request.Params.IsHost) {
                     query = query.Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUsername()));
