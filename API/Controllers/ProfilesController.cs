@@ -19,6 +19,11 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(command));
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> Delete() {
+            return HandleResult(await Mediator.Send(new Delete.Command()));
+        }
+
         [HttpGet("{username}/events")]
         public async Task<IActionResult> GetUserEvents(string username, string predicate) {
             return HandleResult(await Mediator.Send(new ListEvents.Query {

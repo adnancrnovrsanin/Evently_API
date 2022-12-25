@@ -38,6 +38,7 @@ namespace Application.Events
                 if (request.Params.SearchQuery != null) {
                     query = query.Where(x => 
                         x.Title.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
+                        x.HostDisplayName.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
                         x.Description.ToLower().Contains(request.Params.SearchQuery.ToLower()) || 
                         x.Category.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
                         x.City.ToLower().Contains(request.Params.SearchQuery.ToLower()) ||
