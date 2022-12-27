@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -21,17 +22,19 @@ namespace Application.Profiles
         public class Handler : IRequestHandler<Query, Result<List<UserEventDto>>>
         {
             private readonly DataContext _context;
+            private readonly IUserAccessor _userAccessor;
             private readonly IMapper _mapper;
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _mapper = mapper;
                 _context = context;
+                _userAccessor = userAccessor;
             }
 
             public async Task<Result<List<UserEventDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var query = _context.EventAttendees
-                    .Where(u => u.AppUser.UserName == request.Username)
+                    .Where(u => (u.AppUser.UserName == request.Username) && (u.Event.Anonimity != "PRIVATE" || u.Event.Attendees.Any(x => x.AppUser.UserName.ToLower() == _userAccessor.GetUsername().ToLower())))
                     .OrderBy(a => a.Event.Date)
                     .ProjectTo<UserEventDto>(_mapper.ConfigurationProvider)
                     .AsQueryable();

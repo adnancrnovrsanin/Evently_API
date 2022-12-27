@@ -30,10 +30,11 @@ namespace Application.Events
             public async Task<Result<PagedList<EventDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var query = _context.Events
-                    .Where(d => d.Date >= request.Params.StartDate)
-                    .OrderBy(d => d.Date)
+                    .Where(d => (d.Date >= request.Params.StartDate) && (d.Anonimity != "PRIVATE" || d.Attendees.Any(x => x.AppUser.UserName.ToLower() == _userAccessor.GetUsername().ToLower())))
                     .ProjectTo<EventDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
                     .AsQueryable();
+
+                
                 
                 if (request.Params.SearchQuery != null) {
                     query = query.Where(x => 
