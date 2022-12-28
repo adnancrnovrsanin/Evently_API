@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Profiles;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     public class ProfilesController : BaseApiController
     {
+        [AllowAnonymous]
         [HttpGet("{username}")]
         public async Task<IActionResult> GetProfile(string username) {
             return HandleResult(await Mediator.Send(new Details.Query{ Username = username }));
@@ -24,6 +26,7 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(new Delete.Command()));
         }
 
+        [AllowAnonymous]
         [HttpGet("{username}/events")]
         public async Task<IActionResult> GetUserEvents(string username, string predicate) {
             return HandleResult(await Mediator.Send(new ListEvents.Query {

@@ -8,11 +8,13 @@ namespace API.Controllers
 {
     public class EventsController : BaseApiController
     {
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetEvents([FromQuery]EventParams param) {
             return HandlePagedResult(await Mediator.Send(new List.Query{ Params = param }));
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")] // single Event
         public async Task<IActionResult> GetEvent(Guid id) {
             return HandleResult(await Mediator.Send(new Details.Query{ Id = id }));

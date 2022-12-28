@@ -31,6 +31,7 @@ namespace Application.Events
             {
                 var query = _context.Events
                     .Where(d => (d.Date >= request.Params.StartDate) && (d.Anonimity != "PRIVATE" || d.Attendees.Any(x => x.AppUser.UserName.ToLower() == _userAccessor.GetUsername().ToLower())))
+                    .OrderBy(d => d.Date)
                     .ProjectTo<EventDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
                     .AsQueryable();
 
