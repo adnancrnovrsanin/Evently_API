@@ -85,7 +85,6 @@ namespace API.Controllers
             return Ok("Registration successful, please check your email to verify your account");
         }
 
-        [AllowAnonymous]
         [HttpPost("verifyEmail")]
         public async Task<ActionResult> VerifyEmail(string token, string email) {
             var user = await _userManager.FindByEmailAsync(email);
@@ -101,7 +100,6 @@ namespace API.Controllers
             return BadRequest("Email not verified");
         }
 
-        [AllowAnonymous]
         [HttpGet("resendEmailConfirmationLink")]
         public async Task<ActionResult> ResendEmailConfirmationLink(string email) {
             var user = await _userManager.FindByEmailAsync(email);
