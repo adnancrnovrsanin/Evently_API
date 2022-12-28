@@ -43,10 +43,11 @@ namespace API.Controllers
 
             if (user.UserName == "bob") user.EmailConfirmed = true;
 
+            if (!user.EmailConfirmed) return Unauthorized($"Email not verified|{user.Email}");
+            
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (result.Succeeded) {
-                if (!user.EmailConfirmed) return Unauthorized($"Email not verified|{user.Email}");
                 return CreateUserObject(user);
             }
 
