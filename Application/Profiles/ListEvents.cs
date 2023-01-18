@@ -40,9 +40,9 @@ namespace Application.Profiles
                     .AsQueryable();
 
                 query = request.Predicate switch {
-                    "past" => query.Where(a => a.Date <= DateTime.Now),
+                    "past" => query.Where(a => a.Date.ToUniversalTime() <= DateTime.Now.ToUniversalTime()),
                     "hosting" => query.Where(a => a.HostUsername == request.Username),
-                    _ => query.Where(a => a.Date >= DateTime.Now)
+                    _ => query.Where(a => a.Date.ToUniversalTime() >= DateTime.Now.ToUniversalTime())
                 };
 
                 var events = await query.ToListAsync();
