@@ -23,11 +23,11 @@ namespace API.Extensions
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
             });
             services.AddDbContext<DataContext>(opt => {
-                opt.UseNpgsql(config.GetConnectionString("DATABASE_URL"));
+                opt.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL"));
             });
             services.AddCors(opt => {
                 opt.AddPolicy("CorsPolicy", policy => {
-                    policy.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000");
+                    policy.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin();
                 });
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
