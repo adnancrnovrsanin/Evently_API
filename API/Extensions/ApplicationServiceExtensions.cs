@@ -24,6 +24,7 @@ namespace API.Extensions
             });
             services.AddDbContext<DataContext>(opt => {
                 opt.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL"));
+                // opt.UseNpgsql(config.GetConnectionString("DATABASE_URL"));
             });
             services.AddCors(opt => {
                 opt.AddPolicy("CorsPolicy", policy => {
