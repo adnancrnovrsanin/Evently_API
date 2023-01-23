@@ -109,10 +109,11 @@ namespace API.Controllers
             if (user == null) return Unauthorized("Invalid email");
 
             var origin = Request.Headers["origin"];
+            var host = "https://evently.herokuapp.com";
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-            var verifyUrl = $"{origin}/account/verifyEmail?token={token}&email={user.Email}";
+            var verifyUrl = $"{host}/account/verifyEmail?token={token}&email={user.Email}";
             var message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>Click here to verify your email</a></p>";
 
             await _emailSender.SendEmailAsync(user.Email, "Please verify your email", message);
