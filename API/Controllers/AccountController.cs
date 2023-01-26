@@ -54,6 +54,44 @@ namespace API.Controllers
             return Unauthorized("Invalid password");
         }
 
+        [HttpPost("googleAuth")]
+        public async Task<ActionResult<UserDto>> GoogleAuth(GoogleAuthDto googleAuthDto) {
+            var user = await _userManager.Users.Include(p => p.Photos)
+                .FirstOrDefaultAsync(x => x.Email == googleAuthDto.Email);
+
+            if (user == null) {
+
+                string tempUsername = googleAuthDto.Username;
+                while (true)
+                {
+                    var existingUser = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == tempUsername);
+                    if (existingUser == null)
+                    {
+                        googleAuthDto.Username = tempUsername;
+                        break;
+                    }
+                    tempUsername = googleAuthDto.Username + Guid.NewGuid().ToString().Substring(0, 4);
+                }
+
+                user = new AppUser {
+                    DisplayName = googleAuthDto.DisplayName,
+                    Email = googleAuthDto.Email,
+                    UserName = googleAuthDto.Username,
+                    EmailConfirmed = true,
+                };
+
+                var result = await _userManager.CreateAsync(user, googleAuthDto.GoogleId);
+
+                if (!result.Succeeded) return BadRequest("Problem registering user");
+            }
+
+            var resultAuth = await _signInManager.CheckPasswordSignInAsync(user, googleAuthDto.GoogleId, false);
+
+            if (!resultAuth.Succeeded) return BadRequest("Problem signing in user with Google");
+
+            return CreateUserObject(user);
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto) {
             if (await _userManager.Users.AnyAsync(x => x.Email == registerDto.Email)) {

@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpDelete("deleteUser/{username}")]
         public async Task<ActionResult> DeleteUser(string username)
         {
-            if (_userAccessor.GetUsername() != "admin") return Unauthorized();
+            if (_userAccessor.GetUsername() != "bob") return Unauthorized();
 
             var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == username);
             var usersEvents = await _context.Events.Where(x => x.Attendees.SingleOrDefault(a => a.IsHost).AppUser.UserName == username).ToListAsync();
