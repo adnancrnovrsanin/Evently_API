@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using API.DTOs;
 using API.Services;
 using Domain;
@@ -159,6 +155,40 @@ namespace API.Controllers
             await _emailSender.SendEmailAsync(user.Email, "Please verify your email", message);
 
             return Ok("Email confirmation link sent");
+        }
+
+        [HttpPost("forgotPassword")]
+        public async Task<ActionResult> ForgotPassword(string email) {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) return Unauthorized("Invalid email");
+
+            var origin = Request.Headers["origin"];
+            var host = "https://evently.herokuapp.com";
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var resetUrl = $"{host}/account/resetPassword?token={token}&email={user.Email}";
+            var message = $"<p>Please click the below link to reset your password:</p><p><a href='{resetUrl}'>Click here to reset your password</a></p>";
+
+            await _emailSender.SendEmailAsync(user.Email, "Reset your password", message);
+
+            return Ok("Password reset link sent");
+        }
+
+        [HttpPost("resetPassword")]
+        public async Task<ActionResult> ResetPassword(ResetPasswordDto resetPasswordDto) {
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+
+            if (user == null) return Unauthorized("Invalid email");
+
+            resetPasswordDto.Token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(resetPasswordDto.Token));
+
+            var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
+
+            if (result.Succeeded) return Ok("Password reset successful");
+
+            return BadRequest("Password reset failed");
         }
 
         [Authorize]

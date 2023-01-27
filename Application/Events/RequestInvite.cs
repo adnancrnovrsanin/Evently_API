@@ -7,7 +7,7 @@ using Persistence;
 
 namespace Application.Events
 {
-    public class UpdateAttendance
+    public class RequestInvite
     {
         public class Command : IRequest<Result<Unit>> {
             public Guid Id { get; set; }
@@ -15,8 +15,9 @@ namespace Application.Events
 
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
-            private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
+            private readonly DataContext _context;
+
             public Handler(DataContext context, IUserAccessor userAccessor)
             {
                 _userAccessor = userAccessor;
@@ -26,7 +27,7 @@ namespace Application.Events
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var newEvent = await _context.Events
-                    .Include(a => a.Attendees).ThenInclude(u => u.AppUser)
+                    .Include(i => i.InviteRequests).ThenInclude(u => u.AppUser)
                     .SingleOrDefaultAsync(x => x.Id == request.Id);
                 
                 if (newEvent == null) return null;
@@ -35,29 +36,29 @@ namespace Application.Events
 
                 if (user == null) return null;
 
-                var hostUsername = newEvent.Attendees.FirstOrDefault(x => x.IsHost)?.AppUser?.UserName;
+                var attendeeExists = newEvent.Attendees.FirstOrDefault(x => x.AppUser.UserName == user.UserName);
 
-                var attendance = newEvent.Attendees.FirstOrDefault(x => x.AppUser.UserName == user.UserName);
+                if (attendeeExists != null) return Result<Unit>.Failure("You are already attending this event");
 
-                if (attendance != null && hostUsername == user.UserName)
-                    newEvent.IsCancelled = !newEvent.IsCancelled;
+                var requestExists = newEvent.InviteRequests.FirstOrDefault(x => x.AppUser.UserName == user.UserName);
 
-                if (attendance != null && hostUsername != user.UserName)
-                    newEvent.Attendees.Remove(attendance);
-                
-                if (attendance == null) {
-                    attendance = new EventAttendee{
-                        AppUser = user,
-                        Event = newEvent,
-                        IsHost = false
-                    };
+                if (requestExists != null) return Result<Unit>.Failure("You have already requested to join this event");
 
-                    newEvent.Attendees.Add(attendance);
-                }
+                if (newEvent.Anonimity != "ON INVITE") return Result<Unit>.Failure("This event is not open to invites");
+
+                var inviteRequest = new InviteRequest{
+                    AppUser = user,
+                    Event = newEvent,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                newEvent.InviteRequests.Add(inviteRequest);
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                return result ? Result<Unit>.Success(Unit.Value) : Result<Unit>.Failure("Problem updating attendance");
+                if (!result) return Result<Unit>.Failure("Failed to request invite");
+
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

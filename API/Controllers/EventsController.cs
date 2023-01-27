@@ -1,4 +1,3 @@
-using Application.Core;
 using Application.Events;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +45,22 @@ namespace API.Controllers
         [HttpPost("{id}/reportHost")]
         public async Task<IActionResult> ReportHost(Guid id) {
             return HandleResult(await Mediator.Send(new ReportHost.Command{ Id = id }));
+        }
+
+        [HttpPost("{id}/requestInvite")]
+        public async Task<IActionResult> RequestInvite(Guid id) {
+            return HandleResult(await Mediator.Send(new RequestInvite.Command{ Id = id }));
+        }
+
+        [HttpDelete("{id}/removeRequest")]
+        public async Task<IActionResult> RemoveRequest(Guid id, string username) {
+            return HandleResult(await Mediator.Send(new RemoveInviteRequest.Command{ EventId = id, Username = username }));
+        }
+
+        [Authorize(Policy = "IsEventHost")]
+        [HttpPost("{id}/acceptRequest")]
+        public async Task<IActionResult> AcceptRequest(Guid id, string username) {
+            return HandleResult(await Mediator.Send(new AcceptRequest.Command{ EventId = id, Username = username }));
         }
     }
 }

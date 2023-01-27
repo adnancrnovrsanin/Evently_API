@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +30,13 @@ namespace Persistence
             builder.Entity<EventAttendee>()
                 .HasOne(u => u.Event)
                 .WithMany(a => a.Attendees)
+                .HasForeignKey(aa => aa.EventId);
+
+            builder.Entity<InviteRequest>(x => x.HasKey(aa => new { aa.AppUserId, aa.EventId }));
+
+            builder.Entity<InviteRequest>()
+                .HasOne(u => u.Event)
+                .WithMany(a => a.InviteRequests)
                 .HasForeignKey(aa => aa.EventId);
 
             builder.Entity<UserFollowing>(b => {

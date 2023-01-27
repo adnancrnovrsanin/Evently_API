@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Application.Profiles;
-
 namespace Application.Events
 {
     public class EventDto
@@ -21,5 +15,6 @@ namespace Application.Events
         public string HostDisplayName { get; set; }
         public bool IsCancelled { get; set; }
         public ICollection<AttendeeDto> Attendees { get; set; }
+        public ICollection<InviteRequestDto> InviteRequests { get; set; }
     }
 }
