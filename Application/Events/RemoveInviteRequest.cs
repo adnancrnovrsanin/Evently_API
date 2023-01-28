@@ -36,14 +36,6 @@ namespace Application.Events
 
                 if (user == null) return null;
 
-                var isAttendee = newEvent.Attendees.FirstOrDefault(x => x.AppUser.UserName == user.UserName);
-
-                if (isAttendee == null) return Result<Unit>.Failure("This user is not an attendee of this event");
-
-                isAttendee = newEvent.Attendees.FirstOrDefault(x => x.AppUser.UserName == _userAccessor.GetUsername());
-
-                if (isAttendee == null || (isAttendee.AppUser.UserName != request.Username && !isAttendee.IsHost)) return Result<Unit>.Failure("You are not allowed to remove this request");
-
                 var requestExists = newEvent.InviteRequests.FirstOrDefault(x => x.AppUser.UserName == user.UserName);
 
                 if (requestExists == null) return Result<Unit>.Failure("This user has not requested to join this event");

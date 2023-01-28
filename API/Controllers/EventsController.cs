@@ -52,6 +52,7 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(new RequestInvite.Command{ Id = id }));
         }
 
+        [Authorize(Policy = "IsEventHost")]
         [HttpDelete("{id}/removeRequest")]
         public async Task<IActionResult> RemoveRequest(Guid id, string username) {
             return HandleResult(await Mediator.Send(new RemoveInviteRequest.Command{ EventId = id, Username = username }));
@@ -62,5 +63,7 @@ namespace API.Controllers
         public async Task<IActionResult> AcceptRequest(Guid id, string username) {
             return HandleResult(await Mediator.Send(new AcceptRequest.Command{ EventId = id, Username = username }));
         }
+
+        
     }
 }
