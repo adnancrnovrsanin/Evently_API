@@ -457,3 +457,4 @@ $RECYCLE.BIN/
 API/appsettings.json
 API/appsettings.json
 .gitignore
+API/appsettings.Development.json
