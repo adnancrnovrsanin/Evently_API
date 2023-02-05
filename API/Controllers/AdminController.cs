@@ -17,12 +17,14 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IUserAccessor _userAccessor;
+        private readonly IPhotoAccessor _photoAccessor;
 
-        public AdminController(DataContext context, IUserAccessor userAccessor, IMapper mapper)
+        public AdminController(DataContext context, IUserAccessor userAccessor, IMapper mapper, IPhotoAccessor photoAccessor)
         {
             _mapper = mapper;
             _context = context;
             _userAccessor = userAccessor;
+            _photoAccessor = photoAccessor;
         }
 
         [HttpGet("allUsers")]
@@ -37,17 +39,22 @@ namespace API.Controllers
         [HttpDelete("deleteUser/{username}")]
         public async Task<ActionResult> DeleteUser(string username)
         {
-            if (_userAccessor.GetUsername() != "bob") return Unauthorized();
+            if (_userAccessor.GetUsername() != "admin") return Unauthorized();
 
-            var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == username);
+            var user = await _context.Users.Include(p => p.Photos).SingleOrDefaultAsync(x => x.UserName == username);
             var usersEvents = await _context.Events.Where(x => x.Attendees.SingleOrDefault(a => a.IsHost).AppUser.UserName == username).ToListAsync();
+            var usersComments = await _context.Comments.Where(x => x.Author.UserName == username).ToListAsync();
             if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
+            foreach(var photo in user.Photos)
+                await _photoAccessor.DeletePhoto(photo.Id);
+    
+            _context.Comments.RemoveRange(usersComments);
             _context.Events.RemoveRange(usersEvents);
+            _context.Remove(user);
             
             var result = await _context.SaveChangesAsync() > 0;
 

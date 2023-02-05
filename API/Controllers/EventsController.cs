@@ -19,6 +19,11 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(new Details.Query{ Id = id }));
         }
 
+        [HttpGet("near")]
+        public async Task<IActionResult> GetNearEvents([FromQuery]NearbyEventParams param) {
+            return HandleResult(await Mediator.Send(new ListNearEvents.Query{ Params = param }));
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateEvent(Event newEvent) {
             return HandleResult(await Mediator.Send(new Create.Command{ Event = newEvent }));
