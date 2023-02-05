@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
@@ -34,7 +30,7 @@ namespace Application.Events
             public async Task<Result<List<EventDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var events = await _context.Events
-                    .Where(x => x.Attendees.All(a => a.AppUser.UserName != _userAccessor.GetUsername()) && (x.City.ToLower() == request.Params.City.ToLower() || x.Country.ToLower() == request.Params.Country.ToLower()) && x.Anonimity != "PRIVATE")
+                    .Where(x => x.Attendees.All(a => a.AppUser.UserName != _userAccessor.GetUsername()) && (x.City.ToLower() == request.Params.City.ToLower() || x.Country.ToLower() == request.Params.Country.ToLower()) && x.Anonimity != "PRIVATE" && x.Date.ToUniversalTime() >= request.Params.StartDate.ToUniversalTime())
                     .OrderBy(d => d.Date)
                     .ProjectTo<EventDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
                     .ToListAsync();
